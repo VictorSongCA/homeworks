@@ -6,13 +6,23 @@
     <script>
       $(document).ready(function () {
         $("#my-form").submit(function (event) {
-          
           event.preventDefault();
-          
-          var firstName = $("#first-name").val();
-          var lastName = $("#last-name").val();
-          var dob = $("#dob").val();
-          
+
+          var firstName = $("#first-name").val().trim();
+          var lastName = $("#last-name").val().trim();
+          if (firstName.indexOf(" ") >= 0 || lastName.indexOf(" ") >= 0) {
+            alert("First name and last name cannot contain spaces");
+            return;
+          }
+
+          var dob = new Date($("#dob").val());
+          var today = new Date();
+          var age = today.getFullYear() - dob.getFullYear();
+          if (age < 18) {
+            alert("You must be 18 years or older to submit the form");
+            return;
+          }
+
           var newRow =
             "<tr>" +
             "<td>" +
@@ -22,7 +32,7 @@
             lastName +
             "</td>" +
             "<td>" +
-            dob +
+            dob.toISOString().substr(0, 10) +
             "</td>" +
             "<td>" +
             '<button class="edit-btn">Edit</button>' +
@@ -30,22 +40,22 @@
             "</td>" +
             "</tr>";
           $("#my-table tbody").append(newRow);
-         
+
           $("#first-name").val("");
           $("#last-name").val("");
           $("#dob").val("");
         });
-        
+
         $("#my-table tbody").on("click", ".edit-btn", function () {
           var row = $(this).closest("tr");
           var firstName = row.find("td:nth-child(1)").text();
           var lastName = row.find("td:nth-child(2)").text();
           var dob = row.find("td:nth-child(3)").text();
-          
+
           $("#first-name").val(firstName);
           $("#last-name").val(lastName);
           $("#dob").val(dob);
-          
+
           row.remove();
         });
 
