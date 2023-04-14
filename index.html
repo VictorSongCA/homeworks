@@ -3,47 +3,61 @@
   <head>
     <title>My Form</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
     <script>
       $(document).ready(function () {
-        $("#my-form").submit(function (event) {
-          event.preventDefault();
-
-          var firstName = $("#first-name").val().trim();
-          var lastName = $("#last-name").val().trim();
-          if (firstName.indexOf(" ") >= 0 || lastName.indexOf(" ") >= 0) {
-            alert("First name and last name cannot contain spaces");
-            return;
-          }
-
-          var dob = new Date($("#dob").val());
-          var today = new Date();
-          var age = today.getFullYear() - dob.getFullYear();
-          if (age < 18) {
-            alert("You must be 18 years or older to submit the form");
-            return;
-          }
-
-          var newRow =
-            "<tr>" +
-            "<td>" +
-            firstName +
-            "</td>" +
-            "<td>" +
-            lastName +
-            "</td>" +
-            "<td>" +
-            dob.toISOString().substr(0, 10) +
-            "</td>" +
-            "<td>" +
-            '<button class="edit-btn">Edit</button>' +
-            '<button class="delete-btn">Delete</button>' +
-            "</td>" +
-            "</tr>";
-          $("#my-table tbody").append(newRow);
-
-          $("#first-name").val("");
-          $("#last-name").val("");
-          $("#dob").val("");
+        $("#my-form").validate({
+          rules: {
+            "first-name": {
+              required: true,
+              nowhitespace: true,
+            },
+            "last-name": {
+              required: true,
+              nowhitespace: true,
+            },
+            dob: {
+              required: true,
+              date: true,
+              maxAge: 18,
+            },
+          },
+          messages: {
+            "first-name": {
+              required: "Please enter your first name",
+            },
+            "last-name": {
+              required: "Please enter your last name",
+            },
+            dob: {
+              required: "Please enter your date of birth",
+            },
+          },
+          submitHandler: function (form) {
+            var firstName = $("#first-name").val().trim();
+            var lastName = $("#last-name").val().trim();
+            var dob = new Date($("#dob").val());
+            var newRow =
+              "<tr>" +
+              "<td>" +
+              firstName +
+              "</td>" +
+              "<td>" +
+              lastName +
+              "</td>" +
+              "<td>" +
+              dob.toISOString().substr(0, 10) +
+              "</td>" +
+              "<td>" +
+              '<button class="edit-btn">Edit</button>' +
+              '<button class="delete-btn">Delete</button>' +
+              "</td>" +
+              "</tr>";
+            $("#my-table tbody").append(newRow);
+            $("#first-name").val("");
+            $("#last-name").val("");
+            $("#dob").val("");
+          },
         });
 
         $("#my-table tbody").on("click", ".edit-btn", function () {
@@ -63,6 +77,25 @@
           var row = $(this).closest("tr");
           row.remove();
         });
+
+        $.validator.addMethod(
+          "nowhitespace",
+          function (value, element) {
+            return this.optional(element) || /^\S+$/i.test(value);
+          },
+          "No spaces allowed"
+        );
+
+        $.validator.addMethod(
+          "maxAge",
+          function (value, element, maxAge) {
+            var dob = new Date(value);
+            var today = new Date();
+            var age = today.getFullYear() - dob.getFullYear();
+            return age >= maxAge;
+          },
+          ""
+        );
       });
     </script>
   </head>
